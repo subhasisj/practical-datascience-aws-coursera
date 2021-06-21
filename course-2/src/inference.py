@@ -1,3 +1,7 @@
+################################################################################################################################################
+######################################################## Import required modules ###############################################################
+################################################################################################################################################
+
 import json
 import sys
 import logging
@@ -5,18 +9,14 @@ import torch
 from torch import nn
 from transformers import RobertaModel, RobertaTokenizer, RobertaForSequenceClassification, RobertaConfig
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler(sys.stdout))
+################################################################################################################################################
+########################################################### Tools and variables ################################################################
+################################################################################################################################################
 
-###################################
-### VARIABLES 
-###################################
-
-# Needs to be called 'model.pth' as per 
+# Model name according to the PyTorch documentation: 
 # https://github.com/aws/sagemaker-pytorch-inference-toolkit/blob/6936c08581e26ff3bac26824b1e4946ec68ffc85/src/sagemaker_pytorch_serving_container/torchserve.py#L45
 MODEL_NAME = 'model.pth'
-
+# Hugging face list of models: https://huggingface.co/models
 PRE_TRAINED_MODEL_NAME = 'roberta-base'
 MAX_SEQ_LEN = 128
 
@@ -25,10 +25,17 @@ classes = [-1, 0, 1]
 # Load Hugging Face Tokenizer
 TOKENIZER = RobertaTokenizer.from_pretrained(PRE_TRAINED_MODEL_NAME)  
 
+# SageMaker model input function
+def input_fn(serialized_input_data, content_type='application/jsonlines'): 
+    return serialized_input_data
 
-###################################
-### SAGEMKAER LOAD MODEL FUNCTION 
-###################################   
+# SageMaker model output function
+def output_fn(prediction_output, accept='application/jsonlines'):
+    return prediction_output, accept
+
+################################################################################################################################################
+###################################################### SageMaker load model function ###########################################################
+################################################################################################################################################
 
 # You need to put in config.json from saved fine-tuned Hugging Face model in code/ 
 # Reference it in the inference container at /opt/ml/model/code
@@ -41,10 +48,9 @@ def model_fn(model_dir):
     model.to(device)
     return model
 
-
-###################################
-### SAGEMKAER PREDICT FUNCTION 
-###################################   
+################################################################################################################################################
+######################################################## SageMaker predict function ############################################################
+################################################################################################################################################
 
 def predict_fn(input_data, model):
     model.eval()
@@ -124,18 +130,3 @@ def predict_fn(input_data, model):
     print('predicted_classes_jsonlines: {}'.format(predicted_classes_jsonlines))
 
     return predicted_classes_jsonlines
-
-
-###################################
-### SAGEMAKER MODEL INPUT FUNCTION 
-################################### 
-
-def input_fn(serialized_input_data, content_type='application/jsonlines'): 
-    return serialized_input_data
-
-###################################
-### SAGEMAKER MODEL OUTPUT FUNCTION 
-################################### 
-
-def output_fn(prediction_output, accept='application/jsonlines'):
-    return prediction_output, accept

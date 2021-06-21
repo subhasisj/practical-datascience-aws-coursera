@@ -177,11 +177,11 @@ def configure_model():
         PRE_TRAINED_MODEL_NAME, 
         num_labels=len(classes),
         id2label={
-            ### BEGIN SOLUTION - DO NOT delete this comment for grading purposes
-            0: -1, # Replace all None
-            1: 0, # Replace all None
-            2: 1, # Replace all None
-            ### END SOLUTION - DO NOT delete this comment for grading purposes
+            
+            0: -1,
+            1: 0,
+            2: 1,
+            
         },
         label2id={
             -1: 0,
@@ -189,6 +189,7 @@ def configure_model():
             1: 2,
         }
     )
+    
     config.output_attentions=True
 
     return config
